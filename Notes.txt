@@ -1,0 +1,296 @@
+POST /auth/signup
+ ↓
+auth.routes.js
+ ↓
+auth.controller.js
+ ↓
+auth.service.js
+ ↓
+user.model.js
+ ↓
+PostgreSQL
+
+Setting uuid in PostgreSQL:
+- CREATE EXTENSION IF NOT EXISTS pgcrypto;
+- Default -> gen_random_uuid()
+
+
+
+Backend Workflow Documentation (So Far)
+
+1. Goal
+
+This backend is being built for a receipt/transaction automation system
+where:
+
+-   A user records a transaction
+-   Each transaction contains multiple transaction items
+-   Each item represents a purchased product with quantity and amount
+-   Inserts must be consistent (no partial transaction data)
+
+------------------------------------------------------------------------
+
+2. Architecture Followed
+
+We used a clean layered backend architecture:
+
+Routes → Controllers → Services → Models → Database
+
+This keeps code modular, scalable, and easy to debug.
+
+------------------------------------------------------------------------
+
+3. Folder / Layer Responsibilities
+
+Routes (Routes/)
+
+Responsible for: - defining API endpoints - applying middleware (JWT
+verification)
+
+Routes contain no business logic.
+
+------------------------------------------------------------------------
+
+Controllers (Controllers/)
+
+Responsible for: - reading request data (req.body) - validating required
+fields - calling service functions - sending responses using res.json()
+
+Controllers do not directly interact with the database.
+
+------------------------------------------------------------------------
+
+Services (Services/)
+
+Responsible for: - implementing business workflow logic - coordinating
+multiple model calls - handling DB transaction workflow
+(BEGIN/COMMIT/ROLLBACK)
+
+This layer contains the “real process flow” logic.
+
+------------------------------------------------------------------------
+
+Models (Models/)
+
+Responsible for: - writing SQL queries - inserting/selecting/updating DB
+rows - returning DB results
+
+Models do not contain workflow logic.
+
+------------------------------------------------------------------------
+
+4. Authentication Protection (JWT)
+
+We implemented JWT middleware:
+
+verifyToken
+
+This ensures only logged-in users can access protected endpoints like
+transactions.
+
+Example usage:
+
+    router.use(verifyToken);
+    router.post("/", handleTransaction);
+
+This means every route after router.use(verifyToken) is protected.
+
+------------------------------------------------------------------------
+
+5. Transaction Insert Workflow
+
+A transaction request includes:
+
+-   transaction details (date, customer info, amount, discount, etc.)
+-   an array called transactionItems
+
+Example request body:
+
+    {
+      "transaction_date": "2026-02-06",
+      "amount": 450,
+      "transactionItems": [
+        {
+          "item_id": "uuid",
+          "item_name": "Milk",
+          "qty": 2,
+          "amount": 120
+        }
+      ]
+    }
+
+------------------------------------------------------------------------
+
+6. Problem Solved: Atomic Inserts
+
+Without DB transactions:
+
+-   Transaction insert could succeed
+-   Item inserts could fail
+-   DB would contain inconsistent partial data
+
+Example issue: - transaction exists - items missing
+
+------------------------------------------------------------------------
+
+7. Solution: PostgreSQL Transaction (BEGIN / COMMIT / ROLLBACK)
+
+We implemented atomic inserts using:
+
+-   BEGIN
+-   insert transaction
+-   insert transaction items
+-   COMMIT
+
+If any step fails:
+
+-   ROLLBACK
+
+This guarantees:
+
+✅ everything inserts successfully
+❌ or nothing is inserted
+
+This is called atomicity.
+
+------------------------------------------------------------------------
+
+8. Why We Used pool.connect()
+
+PostgreSQL pool allows multiple reusable DB connections.
+
+For transaction queries, we must ensure all queries run on the same
+connection.
+
+So we do:
+
+    const client = await pool.connect();
+
+Then all queries inside the workflow use:
+
+    client.query(...)
+
+instead of:
+
+    pool.query(...)
+
+This is required because BEGIN/COMMIT/ROLLBACK must happen on the same
+client connection.
+
+------------------------------------------------------------------------
+
+9. UUID Handling (transaction_id)
+
+We decided that transaction_id should be generated in the database.
+
+Example table definition idea:
+
+    transaction_id UUID DEFAULT gen_random_uuid()
+
+Workflow:
+
+1.  Insert transaction row
+2.  DB generates UUID
+3.  We capture it using RETURNING *
+4.  Use returned transaction_id to insert transaction items
+
+This ensures correct linking between transactions and transaction_items.
+
+------------------------------------------------------------------------
+
+10. Validation Strategy
+
+Controller-level validation
+
+Controller validates required transaction-level fields:
+
+-   uid
+-   transaction_date
+-   amount
+-   transactionItems must exist and be an array
+
+------------------------------------------------------------------------
+
+Service-level validation
+
+Service validates required item-level fields:
+
+-   item_id
+-   item_name
+-   qty
+-   amount
+
+If missing → throw error → rollback transaction.
+
+------------------------------------------------------------------------
+
+11. Route Restructuring (Important Improvement)
+
+Initially, transaction routes were inside auth routes:
+
+    /auth/transaction
+
+This was semantically incorrect.
+
+We restructured routes into separate modules:
+
+-   /auth/* for login/register/profile
+-   /transaction/* for transaction workflow
+
+This makes the API scalable and industry-standard.
+
+------------------------------------------------------------------------
+
+12. Current API Endpoints
+
+Auth
+
+-   POST /auth/register
+-   POST /auth/login
+-   POST /auth/createProfile
+
+Transaction
+
+-   POST /transaction (protected by JWT)
+
+------------------------------------------------------------------------
+
+13. What Is Completed
+
+✅ JWT-protected transaction route
+✅ transactions table insert
+✅ transaction_items table insert
+✅ atomic DB transaction support
+✅ correct UUID linking workflow
+✅ clean separation of router/controller/service/model structure
+
+------------------------------------------------------------------------
+
+14. What’s Next
+
+Remaining workflows
+
+1.  Items CRUD
+    -   Add item
+    -   Update item
+    -   Delete item
+    -   List/search items
+    -   Inventory support
+2.  Analytics / Aggregation
+    -   total spending per day/week/month
+    -   top selling items
+    -   most purchased items
+    -   trend analysis
+
+------------------------------------------------------------------------
+
+Summary
+
+This backend now follows a scalable architecture and supports safe
+transaction insertion with rollback support. The next step is to
+implement item CRUD, then later implement analytics and aggregation
+workflows.
+
+
+
+
