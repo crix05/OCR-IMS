@@ -1,4 +1,4 @@
-import { createUserTransaction, createTransactionItems } from "../Models/model.js";
+import { createUserTransaction, createTransactionItems } from "../Models/transaction.js";
 import { pool } from "../pool.js";
 
 export async function createTransaction(tranDetails) {

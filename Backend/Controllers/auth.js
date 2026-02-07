@@ -27,7 +27,7 @@ export async function handleLogin(req, res) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
         const user = await validateUser(email, password);
-        const token = generateToken({ id: user.id, email: user.email, role: user.role });
+        const token = generateToken({ id: user.id, email: user.email, uid: user.uid, role: user.role });
 
         res.status(200).json({ message: 'Login successful', user, token });
     } catch (error) {
