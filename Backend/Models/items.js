@@ -1,5 +1,5 @@
 import { pool } from "../pool.js";
-import { insertRow, fetchRows } from "./baseModel.js";
+import { insertRow, fetchRows, deleteRows, updateRows } from "./baseModel.js";
 
 // Categories 
 export async function addCategoryModel(category) {
@@ -8,13 +8,34 @@ export async function addCategoryModel(category) {
 }
 
 export async function fetchCategoriesModel(uid) {
-    const result = await fetchRows(pool, "categories", "uid", uid)
+    const result = await fetchRows(pool, "categories", "uid", uid);
     return result;
 }
 
 export async function findCategoryByName(category) {
-    const result = await fetchRows(pool, "categories", "category_name", category.category_name)
+    const result = await fetchRows(pool, "categories", 
+        "category_name", category.category_name, 
+        "uid", category.uid
+    );
     return result.rows[0];
+}
+
+export async function deleteCategoryModel(category_id, uid) {
+    const result = await deleteRows(pool, "categories", 
+        "category_id", category_id, 
+        "uid", uid
+    );
+    return result.rows[0];
+}
+
+export async function updateCategoryModel(col, val, category) {
+    const result = await updateRows(pool, "categories", 
+        `${col}`, val, 
+        "uid", category.uid, 
+        "category_id", category.category_id
+    );
+
+    return result;
 }
 
 
@@ -31,6 +52,27 @@ export async function fetchItemsModel(uid) {
 }
 
 export async function findItemByName(item) {
-    const result = await fetchRows(pool, "items", "item_name", item.item_name)
+    const result = await fetchRows(pool, "items", 
+        "item_name", item.item_name, 
+        "uid", item.uid
+    );
     return result.rows[0];
+}
+
+export async function deleteItemModel(item_id, uid) {
+    const result = await deleteRows(pool, "items", 
+        "item_id", item_id, 
+        "uid", uid
+    );
+    return result.rows[0];
+}
+
+export async function updateItemModel(col, val, item) {
+    const result = await updateRows(pool, "items", 
+        `${col}`, val, 
+        "uid", item.uid, 
+        "item_id", item.item_id
+    );
+
+    return result;
 }

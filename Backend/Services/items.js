@@ -4,7 +4,11 @@ import {
     fetchCategoriesModel, 
     fetchItemsModel, 
     findCategoryByName, 
-    findItemByName 
+    findItemByName,
+    deleteCategoryModel,
+    deleteItemModel,
+    updateCategoryModel,
+    updateItemModel
 } from "../Models/items.js";
 
 export async function addItem(item) {
@@ -45,5 +49,21 @@ export async function fetchItems(uid) {
         throw new Error ('No entries found');
     }
     return items;
+}
+
+export async function deleteCategory(category_id, uid) {
+    const deletedCategory = await deleteCategoryModel(category_id, uid);
+    if(!deletedCategory) {
+        throw new Error ('No such entry found');
+    }
+    return deletedCategory;
+}
+
+export async function deleteItem(item_id, uid) {
+    const deletedItem = await deleteItemModel(item_id, uid);
+    if(!deletedItem) {
+        throw new Error ('No such entry found');
+    }
+    return deletedItem;
 }
 

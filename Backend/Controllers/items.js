@@ -1,4 +1,11 @@
-import { addItem, addCategory, fetchCategories, fetchItems } from '../Services/items.js'
+import { 
+    addItem, 
+    addCategory, 
+    fetchCategories, 
+    fetchItems,
+    deleteCategory,
+    deleteItem
+ } from '../Services/items.js'
 
 export async function handleItemAddition(req, res) {
     try {
@@ -57,6 +64,28 @@ export async function handleFetchItems(req, res) {
         const items = await fetchItems(uid);
         return res.status(201).json(items.rows);
     } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+}
+
+export async function handleDeleteCategory(req, res) {
+    try {
+        const category_id = req.body.category_id;
+        const uid = req.body.uid;
+        const deletedCategory = await deleteCategory(category_id, uid);
+        return res.status(201).json(deletedCategory);
+    } catch(error) {
+        res.status(500).json({error: error.message});
+    }
+}
+
+export async function handleDeleteItem(req, res) {
+    try {
+        const item_id = req.body.item_id;
+        const uid = req.body.uid;
+        const deletedItem = await deleteItem(item_id, uid);
+        return res.status(201).json(deletedItem);
+    } catch(error) {
         res.status(500).json({error: error.message});
     }
 }
