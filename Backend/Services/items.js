@@ -67,3 +67,18 @@ export async function deleteItem(item_id, uid) {
     return deletedItem;
 }
 
+export async function updateCategory(col, val, category_id, uid) {
+    const updatedCategory = await updateCategoryModel(col, val, category_id, uid);
+    if(!updatedCategory) {
+        throw new Error ('No such entry found');
+    }
+    return updatedCategory;
+}
+
+export async function updateItem(col, val, item_id, uid) {
+    const updatedItem = await updateItemModel(col, val, item_id, uid);
+    if(!updatedItem) {
+        throw new Error ('No such entry found');
+    }
+    return updatedItem;
+}  

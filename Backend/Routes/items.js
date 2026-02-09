@@ -6,7 +6,9 @@ import {
     handleFetchItems, 
     handleFetchCategories,
     handleDeleteCategory,
-    handleDeleteItem
+    handleDeleteItem,
+    handleUpdateCategory,
+    handleUpdateItem
 } from "../Controllers/items.js";
 
 const router = express.Router();
@@ -18,5 +20,7 @@ router.post('/addItem', handleItemAddition);
 router.post('/addCategory', handleCategoryAddition);
 router.post('/deleteCategory', handleDeleteCategory);
 router.post('/deleteItem', handleDeleteItem);
+router.post('/updateCategory', handleUpdateCategory);
+router.post('/updateItem', handleUpdateItem);
 
 export default router;

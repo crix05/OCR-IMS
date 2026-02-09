@@ -4,7 +4,9 @@ import {
     fetchCategories, 
     fetchItems,
     deleteCategory,
-    deleteItem
+    deleteItem,
+    updateCategory,
+    updateItem
  } from '../Services/items.js'
 
 export async function handleItemAddition(req, res) {
@@ -85,6 +87,26 @@ export async function handleDeleteItem(req, res) {
         const uid = req.body.uid;
         const deletedItem = await deleteItem(item_id, uid);
         return res.status(201).json(deletedItem);
+    } catch(error) {
+        res.status(500).json({error: error.message});
+    }
+}
+
+export async function handleUpdateCategory(req, res) {
+    try {
+        const { col, val, category_id, uid } = req.body;
+        const updatedCategory = await updateCategory(col, val, category_id, uid);
+        return res.status(201).json(updatedCategory);
+    } catch(error) {
+        res.status(500).json({error: error.message});
+    }
+}
+
+export async function handleUpdateItem(req, res) {
+    try {
+        const { col, val, item_id, uid } = req.body;
+        const updatedItem = await updateItem(col, val, item_id, uid);
+        return res.status(201).json(updatedItem);
     } catch(error) {
         res.status(500).json({error: error.message});
     }

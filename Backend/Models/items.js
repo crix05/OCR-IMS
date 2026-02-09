@@ -28,14 +28,14 @@ export async function deleteCategoryModel(category_id, uid) {
     return result.rows[0];
 }
 
-export async function updateCategoryModel(col, val, category) {
+export async function updateCategoryModel(col, val, category_id, uid) {
     const result = await updateRows(pool, "categories", 
         `${col}`, val, 
-        "uid", category.uid, 
-        "category_id", category.category_id
+        "uid", uid, 
+        "category_id", category_id
     );
 
-    return result;
+    return result.rows[0];
 }
 
 
@@ -67,12 +67,13 @@ export async function deleteItemModel(item_id, uid) {
     return result.rows[0];
 }
 
-export async function updateItemModel(col, val, item) {
+export async function updateItemModel(col, val, item_id, uid) {
     const result = await updateRows(pool, "items", 
         `${col}`, val, 
-        "uid", item.uid, 
-        "item_id", item.item_id
+        "uid", uid, 
+        "item_id", item_id
     );
 
-    return result;
+    return result.rows[0];
 }
+

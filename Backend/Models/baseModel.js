@@ -40,13 +40,20 @@ export async function fetchRows(connection, tableName, col1, val1, col2 = null, 
     return result;
 }
 
-export async function deleteRows(connection, tableName, col1, val1, col2, val2) {
+export async function deleteRows(connection, tableName, col1, val1, col2 = null, val2 = null) {
     if (!tableName || !col1 || val1 === undefined) {
         throw new Error("Mandatory details missing");
     }
 
-    const query = `DELETE FROM ${tableName} WHERE ${col1} = $1 AND ${col2} = $2 RETURNING *`;
-    const values = [val1, val2];
+    let query = `DELETE FROM ${tableName} WHERE ${col1} = $1`;
+    let values = [val1];
+
+    if (col2 && val2 !== undefined) {
+        query += ` AND ${col2} = $2`;
+        values.push(val2);
+    }
+
+    query += ` RETURNING *`;
 
     const result = await connection.query(query, values);
     return result;
@@ -70,6 +77,8 @@ export async function updateRows(connection, tableName, col1, val1, col2, val2, 
         query += ` AND ${col3} = $3`;
         values.push(val3);
     }
+
+    query += ` RETURNING *`;
 
     const result = await connection.query(query, values);
     return result;
