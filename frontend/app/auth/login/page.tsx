@@ -32,8 +32,13 @@ export function LoginLeft() {
         setIsLoading(true);
 
         try {
-            await loginUser({ email, password });
-            router.push("/dashboard");
+            const res = await loginUser({ email, password });
+            if(res.message == 'dashboard') {
+                router.push("/auth/createProfile");
+            } else {
+                router.push("/auth/createProfile");
+            }
+            
         } catch(err: any) {
             setError(err.message || "Login Failed");
             console.log("Error: ", error);

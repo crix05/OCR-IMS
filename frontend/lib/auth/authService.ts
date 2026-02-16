@@ -22,6 +22,7 @@ export type CreateProfileRequest = {
 }
 
 export type AuthResponse = {
+    message: string;
     token: string;
 };
 

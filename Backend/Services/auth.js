@@ -1,4 +1,4 @@
-import { findUserByEmail, createUser, createUserProfile } from "../Models/model.js";
+import { findUserByEmail, createUser, createUserProfile, isUserProfileAvailable } from "../Models/model.js";
 import { hashPassword } from "../Utils/Password.js";
 import bcrypt from "bcrypt";
 
@@ -34,4 +34,9 @@ export async function createProfile(profile) {
         throw new Error('Profile not created');
     }
     return userProfile;
+}
+
+export async function isProfileAvailable(uid) {
+    const isProfileAvailable = await isUserProfileAvailable(uid);
+    return isProfileAvailable;
 }

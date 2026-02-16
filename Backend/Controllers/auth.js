@@ -1,4 +1,4 @@
-import { registerUser, validateUser, createProfile } from "../Services/auth.js";
+import { registerUser, validateUser, createProfile, isProfileAvailable } from "../Services/auth.js";
 import { generateToken } from "../Utils/jwt.js";
 
 export async function handleRegisterUser(req, res) {
@@ -28,9 +28,11 @@ export async function handleLogin(req, res) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
         const user = await validateUser(email, password);
-        const token = generateToken({ id: user.id, email: user.email, uid: user.uid, role: user.role });
+        const token = generateToken({ email: user.email, uid: user.uid, role: user.role });
 
-        res.status(200).json({ message: 'Login successful', user, token });
+        const profileStatus = await isProfileAvailable(user.uid);
+
+        res.status(200).json({ message: profileStatus.rowCount ? "dashboard" : "createProfile", user, token });
     } catch (error) {
         if (error.message == 'User not found' || error.message == 'Invalid password') {
             res.status(401).json({ error: error.message });
@@ -43,7 +45,6 @@ export async function handleLogin(req, res) {
 export async function handleProfileCreation(req, res) {
     try {
         const profile = req.body;
-        console.log("***profile***", profile);
         if(
             !profile.uid ||
             !profile.company_name?.trim() ||

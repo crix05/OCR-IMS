@@ -36,19 +36,24 @@ export default function createProfile() {
         }))
     }
 
-    async function handleLogin(e: React.SubmitEvent) {
+    async function handleProfileCreation(e: React.SubmitEvent) {
         e.preventDefault();
 
         setError("");
         setIsLoading(true);
 
-        try {
-            const token = getToken();
+        const form = e.currentTarget as HTMLFormElement;
+        const formVals = new FormData(form);
 
-            await createUserProfile({ ...formData })
+        const action = formVals.get("action");
+
+        try {
+            if(action === "createProfile") {
+                await createUserProfile({ ...formData })
+            }
             router.push("/dashboard");
         } catch(err: any) {
-            setError(err.message || "Login Failed");
+            setError(err.message || "Profile Creation failed");
         } finally {
             setIsLoading(false);
         }
@@ -66,7 +71,7 @@ export default function createProfile() {
                 </div>
 
 
-                <form className = "flex flex-col gap-6" onSubmit={handleLogin}>
+                <form className = "flex flex-col gap-6" onSubmit={handleProfileCreation}>
 
                     <div className = {styles.inputWrapper}>
 
@@ -127,11 +132,25 @@ export default function createProfile() {
 
                     <button 
                         type="submit" 
+                        value="createProfile"
                         disabled={isLoading}
                         className = "p-3 mt-5 bg-secondary rounded-xl font-nunito text-body transition duration-300 cursor-pointer hover:shadow-3xl w-full"
                     >
-                    {isLoading ? "Signing in..." : "Sign in"}
+                    {isLoading ? "Submitting..." : "Submit"}
                     </button>
+
+                    <div className = "w-full flex justify-center items-center">
+                        <button 
+                            type="submit" 
+                            value="skip"
+                            disabled={isLoading}
+                            formNoValidate
+                            className = "font-nunito text-secondary text-label transition duration-300 cursor-pointer hover:shadow-3xl w-fit"
+                        >
+                        Skip for now
+                        </button>
+                    </div>
+                    
 
                     {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
 

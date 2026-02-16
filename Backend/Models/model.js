@@ -1,9 +1,10 @@
 import { pool } from "../pool.js";
+import { fetchRows } from "./baseModel.js";
 
 // Onboarding / Authentication
-export async function findUserByEmail(email, uid) {
-    const query = 'SELECT * FROM users WHERE email = $1 AND uid = $2';
-    const result = await pool.query(query, [email, uid]);
+export async function findUserByEmail(email) {
+    const query = 'SELECT * FROM users WHERE email = $1';
+    const result = await pool.query(query, [email]);
     return result.rows[0];
 }
 
@@ -35,6 +36,13 @@ export async function createUserProfile(profile) {
   const result = await pool.query(query, values);
   return result.rows[0];
 }
+
+export async function isUserProfileAvailable(uid) {
+  const isProfileAvailable = await fetchRows(pool, "client_profiles",
+    "uid", uid
+  );
+  return isProfileAvailable;
+} 
 
 
 
