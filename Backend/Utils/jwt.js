@@ -10,12 +10,13 @@ export function generateToken(payload) {
 
 export function verifyToken(req, res, next) {
     try {
-        const token = req.headers['authorization'];
+        const authHeader = req.headers['authorization'];
+        const token = authHeader.split(" ")[1];
         if(!token) {
             return res.status(401).json({ error:'Token missing' });
         }
         const decoded = jwt.verify(token, secretKey);
-        req.uid = decoded.uid;
+        req.body.uid = decoded.uid;
         next();
     } catch(error) {
         return res.status(403).json({ error: 'Invalid or expired token' });

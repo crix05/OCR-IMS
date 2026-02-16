@@ -1,16 +1,16 @@
 import { pool } from "../pool.js";
 
 // Onboarding / Authentication
-export async function findUserByEmail(email) {
-    const query = 'SELECT * FROM users WHERE email = $1';
-    const result = await pool.query(query, [email]);
+export async function findUserByEmail(email, uid) {
+    const query = 'SELECT * FROM users WHERE email = $1 AND uid = $2';
+    const result = await pool.query(query, [email, uid]);
     return result.rows[0];
 }
 
 export async function createUser(details) {
-    const { name, email, password, role } = details;
+    const { name, email, password } = details;
     const query = 'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *';
-    const result = await pool.query(query, [name, email, password, role]);
+    const result = await pool.query(query, [name, email, password, details.role ?? `client`]);
     return result.rows[0];
 }
 

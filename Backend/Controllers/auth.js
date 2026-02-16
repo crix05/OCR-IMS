@@ -5,12 +5,13 @@ export async function handleRegisterUser(req, res) {
     try {
         const details = req.body;
 
-        if(!details.name || !details.email || !details.password || !details.role) {
+        if(!details.name || !details.email || !details.password) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         const user = await registerUser(details);
-        res.status(201).json({ message: 'User registered successfully', user });
+        const token = generateToken({email: user.email, uid: user.uid});
+        res.status(201).json({ message: 'User registered successfully', user, token });
     } catch (error) {
         if (error.message === 'User already exists') {
             res.status(409).json({ error: error.message });
@@ -42,6 +43,7 @@ export async function handleLogin(req, res) {
 export async function handleProfileCreation(req, res) {
     try {
         const profile = req.body;
+        console.log("***profile***", profile);
         if(
             !profile.uid ||
             !profile.company_name?.trim() ||
